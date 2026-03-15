@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app1
+spec:
+  selector:
+    matchLabels:
+      app: app1
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: app1
+    spec:
+      containers:
+      - name: flask
+        image: app1:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app1
+spec:
+  ports:
+  - port: 5001
+    targetPort: 5001
+  selector:
+    app: app1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app1-worker
+spec:
+  selector:
+    matchLabels:
+      app: app1-worker
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: app1-worker
+    spec:
+      containers:
+      - name: worker
+        image: app1:latest
+        imagePullPolicy: Never
+        command: ["celery", "-A", "tasks.celery_app", "worker", "--loglevel=info"]
